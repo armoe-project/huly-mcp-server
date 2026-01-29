@@ -43,31 +43,18 @@
 - `list_task_types` - タスクタイプを一覧表示
 - `list_statuses` - すべてのステータスを一覧表示
 
-## インストール
-
-### 前提条件
-
-- [Bun](https://bun.sh) >= 1.3.0
-
-### 手順
-
-```bash
-bun install
-```
-
 ## 設定
 
-### 環境変数の使用
+### 認証情報の取得
 
-`.env` ファイルを作成するか、環境変数を設定：
+1. **Workspace**: ワークスペース識別子（例: `my-company`、`https://huly.app/my-company` から）
+2. **Email/Password**: Huly アカウントの認証情報
+
+### 環境変数
 
 ```bash
 # 必須
 HULY_WORKSPACE=your-workspace-identifier
-
-# 認証（いずれか）
-HULY_TOKEN=your-token
-# または
 HULY_EMAIL=your-email@example.com
 HULY_PASSWORD=your-password
 
@@ -75,11 +62,40 @@ HULY_PASSWORD=your-password
 HULY_URL=https://huly.app
 ```
 
-### 認証情報の取得
+### CC-Switch
 
-1. **Workspace**: ワークスペース識別子（例: `my-company`、`https://huly.app/my-company` から）
-2. **Token**: Huly 設定 → アカウント → トークンで生成
-3. **Email/Password**: Huly アカウントの認証情報
+CC-Switch で右上の "MCP" ボタンをクリック：
+
+1. "サーバーを追加" をクリック
+2. 設定：
+   - **名前**: `huly`
+   - **トランスポート**: `stdio`
+   - **コマンド**: `bunx`
+   - **引数**: `["@armoe/huly-mcp-server@latest"]`
+   - **環境変数**:
+     ```
+     HULY_WORKSPACE=your-workspace
+     HULY_EMAIL=your-email@example.com
+     HULY_PASSWORD=your-password
+     ```
+3. サーバーを有効化してアプリケーションに同期
+
+### Cherry Studio
+
+Cherry Studio 設定で新しい MCP サーバーを追加：
+
+```json
+{
+  "name": "huly",
+  "command": "bunx",
+  "args": ["@armoe/huly-mcp-server@latest"],
+  "env": {
+    "HULY_WORKSPACE": "your-workspace",
+    "HULY_EMAIL": "your-email@example.com",
+    "HULY_PASSWORD": "your-password"
+  }
+}
+```
 
 ### Claude Desktop 設定
 
@@ -90,34 +106,96 @@ HULY_URL=https://huly.app
   "mcpServers": {
     "huly": {
       "command": "bunx",
-      "args": ["@armoe/huly-mcp-server"],
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-または npx を使用：
+### Claude Code
+
+`.claude/mcp.json` に追加：
 
 ```json
 {
   "mcpServers": {
     "huly": {
-      "command": "npx",
-      "args": ["@armoe/huly-mcp-server"],
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-**⚠️ セ�上注意**: `.mcp.json` は機密情報を含むため `.gitignore` に追加済み。バージョン管理システムにコミットしないでください。
+### Cursor
+
+VSCode 設定 (`settings.json`) に追加：
+
+```json
+{
+  "mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+### Cline (VSCode 拡張)
+
+VSCode 設定に追加：
+
+```json
+{
+  "cline.mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+## インストール
+
+### 前提条件
+
+- [Bun](https://bun.sh) >= 1.3.0
+
+### npm からインストール（推奨）
+
+```bash
+bunx @armoe/huly-mcp-server@latest
+```
+
+### ソースからインストール
+
+```bash
+git clone https://github.com/armoe/huly-mcp-server.git
+cd huly-mcp-server
+bun install
+```
 
 ## 使用方法
 
@@ -126,7 +204,8 @@ HULY_URL=https://huly.app
 ```bash
 # 環境変数を設定
 export HULY_WORKSPACE=your-workspace
-export HULY_TOKEN=your-token
+export HULY_EMAIL=your-email@example.com
+export HULY_PASSWORD=your-password
 
 # サーバーを実行
 bun run src/index.ts
@@ -161,7 +240,7 @@ huly-mcp-server/
 ├── src/
 │   ├── client.ts          # Huly API クライアント
 │   ├── config.ts          # 設定読み込み
-│   ├── index.ts           # サーバーエンリーポイント
+│   ├── index.ts           # サーバーエントリーポイント
 │   ├── tools/             # MCP ツール実装
 │   │   ├── issue.ts       # Issue 関連ツール
 │   │   ├── label.ts       # ラベル関連ツール
@@ -169,7 +248,7 @@ huly-mcp-server/
 │   │   ├── milestone.ts   # マイルストーン関連ツール
 │   │   ├── person.ts      # コンタクト関連ツール
 │   │   └── project.ts     # プロジェクト関連ツール
-│   └── utils/             # ユ�ーティリティ関数
+│   └── utils/             # ユーティリティ関数
 │       └── converters.ts  # 型変換関数
 ├── .mcp.json.example      # MCP 設定テンプレート
 └── package.json

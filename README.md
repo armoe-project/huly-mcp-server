@@ -43,31 +43,18 @@
 - `list_task_types` - List task types
 - `list_statuses` - List all statuses
 
-## Installation
-
-### Prerequisites
-
-- [Bun](https://bun.sh) >= 1.3.0
-
-### Steps
-
-```bash
-bun install
-```
-
 ## Configuration
 
-### Using Environment Variables
+### Getting Credentials
 
-Create `.env` file or set environment variables:
+1. **Workspace**: Workspace identifier (e.g. `my-company` from `https://huly.app/my-company`)
+2. **Email/Password**: Your Huly account credentials
+
+### Environment Variables
 
 ```bash
 # Required
 HULY_WORKSPACE=your-workspace-identifier
-
-# Authentication (choose one)
-HULY_TOKEN=your-token
-# or
 HULY_EMAIL=your-email@example.com
 HULY_PASSWORD=your-password
 
@@ -75,13 +62,42 @@ HULY_PASSWORD=your-password
 HULY_URL=https://huly.app
 ```
 
-### Getting Credentials
+### CC-Switch
 
-1. **Workspace**: Workspace identifier (e.g. `my-company` from `https://huly.app/my-company`)
-2. **Token**: Generate in Huly Settings → Account → Tokens
-3. **Email/Password**: Your Huly account credentials
+In CC-Switch, click the "MCP" button in the top-right corner:
 
-### Claude Desktop Configuration
+1. Click "Add Server"
+2. Configure:
+   - **Name**: `huly`
+   - **Transport**: `stdio`
+   - **Command**: `bunx`
+   - **Args**: `["@armoe/huly-mcp-server@latest"]`
+   - **Environment**:
+     ```
+     HULY_WORKSPACE=your-workspace
+     HULY_EMAIL=your-email@example.com
+     HULY_PASSWORD=your-password
+     ```
+3. Enable the server to sync to applications
+
+### Cherry Studio
+
+In Cherry Studio settings, add a new MCP server:
+
+```json
+{
+  "name": "huly",
+  "command": "bunx",
+  "args": ["@armoe/huly-mcp-server@latest"],
+  "env": {
+    "HULY_WORKSPACE": "your-workspace",
+    "HULY_EMAIL": "your-email@example.com",
+    "HULY_PASSWORD": "your-password"
+  }
+}
+```
+
+### Claude Desktop
 
 Add to `~/.claude/claude_desktop_config.json`:
 
@@ -90,34 +106,96 @@ Add to `~/.claude/claude_desktop_config.json`:
   "mcpServers": {
     "huly": {
       "command": "bunx",
-      "args": ["@armoe/huly-mcp-server"],
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-Or using npx:
+### Claude Code
+
+Add to `.claude/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "huly": {
-      "command": "npx",
-      "args": ["@armoe/huly-mcp-server"],
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-**⚠️ Security Note**: `.mcp.json` contains sensitive information and is added to `.gitignore`. Do not commit it to version control.
+### Cursor
+
+Add to VSCode settings (`settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+### Cline (VSCode Extension)
+
+Add to VSCode settings:
+
+```json
+{
+  "cline.mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+## Installation
+
+### Prerequisites
+
+- [Bun](https://bun.sh) >= 1.3.0
+
+### From npm (Recommended)
+
+```bash
+bunx @armoe/huly-mcp-server@latest
+```
+
+### From Source
+
+```bash
+git clone https://github.com/armoe/huly-mcp-server.git
+cd huly-mcp-server
+bun install
+```
 
 ## Usage
 
@@ -126,7 +204,8 @@ Or using npx:
 ```bash
 # Set environment variables
 export HULY_WORKSPACE=your-workspace
-export HULY_TOKEN=your-token
+export HULY_EMAIL=your-email@example.com
+export HULY_PASSWORD=your-password
 
 # Run server
 bun run src/index.ts

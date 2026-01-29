@@ -43,31 +43,18 @@
 - `list_task_types` - 列出任务类型
 - `list_statuses` - 列出所有状态
 
-## 安装
-
-### 前置要求
-
-- [Bun](https://bun.sh) >= 1.3.0
-
-### 步骤
-
-```bash
-bun install
-```
-
 ## 配置
 
-### 使用环境变量
+### 获取凭证
 
-创建 `.env` 文件或设置环境变量：
+1. **Workspace**: 工作区标识符（例如 `my-company`，来自 `https://huly.app/my-company`）
+2. **Email/Password**: 您的 Huly 账户凭证
+
+### 环境变量
 
 ```bash
 # 必需
 HULY_WORKSPACE=your-workspace-identifier
-
-# 认证（二选一）
-HULY_TOKEN=your-token
-# 或
 HULY_EMAIL=your-email@example.com
 HULY_PASSWORD=your-password
 
@@ -75,13 +62,42 @@ HULY_PASSWORD=your-password
 HULY_URL=https://huly.app
 ```
 
-### 获取凭证
+### CC-Switch
 
-1. **Workspace**: 工作区标识符（例如 `my-company`，来自 `https://huly.app/my-company`）
-2. **Token**: 在 Huly 设置 → 账户 → 令牌中生成
-3. **Email/Password**: 您的 Huly 账户凭证
+在 CC-Switch 中点击右上角 "MCP" 按钮：
 
-### Claude Desktop 配置
+1. 点击 "添加服务器"
+2. 配置：
+   - **名称**: `huly`
+   - **传输**: `stdio`
+   - **命令**: `bunx`
+   - **参数**: `["@armoe/huly-mcp-server@latest"]`
+   - **环境变量**:
+     ```
+     HULY_WORKSPACE=your-workspace
+     HULY_EMAIL=your-email@example.com
+     HULY_PASSWORD=your-password
+     ```
+3. 启用服务器以同步到应用程序
+
+### Cherry Studio
+
+在 Cherry Studio 设置中添加新的 MCP 服务器：
+
+```json
+{
+  "name": "huly",
+  "command": "bunx",
+  "args": ["@armoe/huly-mcp-server@latest"],
+  "env": {
+    "HULY_WORKSPACE": "your-workspace",
+    "HULY_EMAIL": "your-email@example.com",
+    "HULY_PASSWORD": "your-password"
+  }
+}
+```
+
+### Claude Desktop
 
 添加到 `~/.claude/claude_desktop_config.json`：
 
@@ -90,34 +106,96 @@ HULY_URL=https://huly.app
   "mcpServers": {
     "huly": {
       "command": "bunx",
-      "args": ["@armoe/huly-mcp-server"],
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-或使用 npx：
+### Claude Code
+
+添加到 `.claude/mcp.json`：
 
 ```json
 {
   "mcpServers": {
     "huly": {
-      "command": "npx",
-      "args": ["@armoe/huly-mcp-server"],
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
-        "HULY_TOKEN": "your-token"
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-**⚠️ 安全提示**：`.mcp.json` 包含敏感信息，已添加到 `.gitignore`。请勿将其提交到版本控制系统。
+### Cursor
+
+添加到 VSCode 设置 (`settings.json`)：
+
+```json
+{
+  "mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+### Cline (VSCode 扩展)
+
+添加到 VSCode 设置：
+
+```json
+{
+  "cline.mcpServers": {
+    "huly": {
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server@latest"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_EMAIL": "your-email@example.com",
+        "HULY_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+## 安装
+
+### 前置要求
+
+- [Bun](https://bun.sh) >= 1.3.0
+
+### 从 npm 安装（推荐）
+
+```bash
+bunx @armoe/huly-mcp-server@latest
+```
+
+### 从源码安装
+
+```bash
+git clone https://github.com/armoe/huly-mcp-server.git
+cd huly-mcp-server
+bun install
+```
 
 ## 使用
 
@@ -126,7 +204,8 @@ HULY_URL=https://huly.app
 ```bash
 # 设置环境变量
 export HULY_WORKSPACE=your-workspace
-export HULY_TOKEN=your-token
+export HULY_EMAIL=your-email@example.com
+export HULY_PASSWORD=your-password
 
 # 运行服务器
 bun run src/index.ts
