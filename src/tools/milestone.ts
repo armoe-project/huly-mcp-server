@@ -10,7 +10,6 @@ import {
 	milestoneStatusToString,
 	stringToMilestoneStatus,
 } from "../utils/converters.js";
-import { wrapTool } from "../utils/error-handler.js";
 
 // List Milestones
 export function registerListMilestones(
@@ -36,7 +35,7 @@ export function registerListMilestones(
 				),
 			},
 		},
-		wrapTool(async ({ project }) => {
+		async ({ project }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -69,7 +68,7 @@ export function registerListMilestones(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -102,7 +101,7 @@ export function registerCreateMilestone(
 				}),
 			},
 		},
-		wrapTool(async ({ project, label, targetDate, status }) => {
+		async ({ project, label, targetDate, status }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -145,7 +144,7 @@ export function registerCreateMilestone(
 					},
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -167,7 +166,7 @@ export function registerDeleteMilestone(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project, label }) => {
+		async ({ project, label }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -202,6 +201,6 @@ export function registerDeleteMilestone(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }

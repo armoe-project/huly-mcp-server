@@ -6,7 +6,6 @@ import tracker, { type Issue } from "@hcengineering/tracker";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
 import { milestoneStatusToString } from "../utils/converters.js";
-import { wrapTool } from "../utils/error-handler.js";
 
 // Helper to parse issue ID and get issue
 async function parseAndFindIssue(
@@ -70,7 +69,7 @@ export function registerListLabels(
 				),
 			},
 		},
-		wrapTool(async () => {
+		async () => {
 			const client = await getClient();
 
 			const tagElements = await client.findAll(tags.class.TagElement, {
@@ -92,7 +91,7 @@ export function registerListLabels(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -120,7 +119,7 @@ export function registerCreateLabel(
 				}),
 			},
 		},
-		wrapTool(async ({ name, color }) => {
+		async ({ name, color }) => {
 			const client = await getClient();
 
 			// Check if exists
@@ -181,7 +180,7 @@ export function registerCreateLabel(
 					},
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -202,7 +201,7 @@ export function registerDeleteLabel(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ name }) => {
+		async ({ name }) => {
 			const client = await getClient();
 
 			const tagElement = await client.findOne(tags.class.TagElement, {
@@ -229,7 +228,7 @@ export function registerDeleteLabel(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -252,7 +251,7 @@ export function registerAddRelation(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project: _project, identifier, relatedToIdentifier }) => {
+		async ({ project: _project, identifier, relatedToIdentifier }) => {
 			const client = await getClient();
 
 			const { project, issue } = await parseAndFindIssue(client, identifier);
@@ -299,7 +298,7 @@ export function registerAddRelation(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -322,7 +321,7 @@ export function registerAddBlockedBy(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project: _project, identifier, blockedByIdentifier }) => {
+		async ({ project: _project, identifier, blockedByIdentifier }) => {
 			const client = await getClient();
 
 			const { project, issue } = await parseAndFindIssue(client, identifier);
@@ -369,7 +368,7 @@ export function registerAddBlockedBy(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -392,7 +391,7 @@ export function registerSetParent(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project: _project, identifier, parentIdentifier }) => {
+		async ({ project: _project, identifier, parentIdentifier }) => {
 			const client = await getClient();
 
 			const { project, issue } = await parseAndFindIssue(client, identifier);
@@ -469,7 +468,7 @@ export function registerSetParent(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -496,7 +495,7 @@ export function registerListTaskTypes(
 				),
 			},
 		},
-		wrapTool(async ({ project }) => {
+		async ({ project }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -538,7 +537,7 @@ export function registerListTaskTypes(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -563,7 +562,7 @@ export function registerListStatuses(
 				),
 			},
 		},
-		wrapTool(async () => {
+		async () => {
 			const client = await getClient();
 
 			const statuses = await client.findAll(tracker.class.IssueStatus, {});
@@ -583,7 +582,7 @@ export function registerListStatuses(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 

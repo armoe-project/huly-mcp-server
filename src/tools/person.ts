@@ -2,7 +2,6 @@ import type { PlatformClient } from "@hcengineering/api-client";
 import contact from "@hcengineering/contact";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
-import { wrapTool } from "../utils/error-handler.js";
 
 // List Persons
 export function registerListPersons(
@@ -27,7 +26,7 @@ export function registerListPersons(
 				),
 			},
 		},
-		wrapTool(async ({ limit = 50 }) => {
+		async ({ limit = 50 }) => {
 			const client = await getClient();
 
 			const persons = await client.findAll(contact.class.Person, {}, { limit });
@@ -47,7 +46,7 @@ export function registerListPersons(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -78,7 +77,7 @@ export function registerGetPerson(
 				}),
 			},
 		},
-		wrapTool(async ({ name }) => {
+		async ({ name }) => {
 			const client = await getClient();
 
 			const persons = await client.findAll(contact.class.Person, {
@@ -115,6 +114,6 @@ export function registerGetPerson(
 					},
 				},
 			};
-		}),
+		},
 	);
 }

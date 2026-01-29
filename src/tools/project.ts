@@ -2,7 +2,6 @@ import type { PlatformClient } from "@hcengineering/api-client";
 import tracker from "@hcengineering/tracker";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
-import { wrapTool } from "../utils/error-handler.js";
 
 // List Projects
 export function registerListProjects(
@@ -26,7 +25,7 @@ export function registerListProjects(
 				),
 			},
 		},
-		wrapTool(async () => {
+		async () => {
 			const client = await getClient();
 
 			const projects = await client.findAll(tracker.class.Project, {});
@@ -47,7 +46,7 @@ export function registerListProjects(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -73,7 +72,7 @@ export function registerGetProject(
 				}),
 			},
 		},
-		wrapTool(async ({ identifier }) => {
+		async ({ identifier }) => {
 			const client = await getClient();
 
 			const project = await client.findOne(tracker.class.Project, {
@@ -100,6 +99,6 @@ export function registerGetProject(
 					},
 				},
 			};
-		}),
+		},
 	);
 }

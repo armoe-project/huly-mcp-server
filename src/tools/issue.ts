@@ -10,7 +10,6 @@ import tracker, {
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
 import { priorityToString, stringToPriority } from "../utils/converters.js";
-import { wrapTool } from "../utils/error-handler.js";
 
 // Type definitions to avoid `any`
 interface IssueQuery {
@@ -59,7 +58,7 @@ export function registerListIssues(
 				),
 			},
 		},
-		wrapTool(async ({ project, limit = 20, status }) => {
+		async ({ project, limit = 20, status }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -98,7 +97,7 @@ export function registerListIssues(
 					})),
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -130,7 +129,7 @@ export function registerGetIssue(
 				}),
 			},
 		},
-		wrapTool(async ({ project, identifier }) => {
+		async ({ project, identifier }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -204,7 +203,7 @@ export function registerGetIssue(
 					},
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -239,7 +238,7 @@ export function registerCreateIssue(
 				}),
 			},
 		},
-		wrapTool(async ({ project, title, description, priority, assignee }) => {
+		async ({ project, title, description, priority, assignee }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -326,7 +325,7 @@ export function registerCreateIssue(
 					},
 				},
 			};
-		}),
+		},
 	);
 }
 
@@ -356,76 +355,74 @@ export function registerUpdateIssue(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(
-			async ({
-				project,
+		async ({
+			project,
+			identifier,
+			title,
+			description,
+			status,
+			priority,
+			assignee,
+		}) => {
+			const client = await getClient();
+
+			const projectData = await client.findOne(tracker.class.Project, {
+				identifier: project,
+			});
+
+			if (!projectData) {
+				throw new Error(`Project "${project}" not found`);
+			}
+
+			const issue = await client.findOne(tracker.class.Issue, {
+				space: projectData._id,
 				identifier,
-				title,
-				description,
-				status,
-				priority,
-				assignee,
-			}) => {
-				const client = await getClient();
+			});
 
-				const projectData = await client.findOne(tracker.class.Project, {
-					identifier: project,
-				});
+			if (!issue) {
+				throw new Error(`Issue "${identifier}" not found`);
+			}
 
-				if (!projectData) {
-					throw new Error(`Project "${project}" not found`);
-				}
+			const updates: IssueUpdates = {};
+			if (title) updates.title = title;
+			if (status) updates.status = status;
+			if (assignee !== undefined) updates.assignee = assignee;
+			if (priority) {
+				updates.priority = stringToPriority(priority);
+			}
 
-				const issue = await client.findOne(tracker.class.Issue, {
-					space: projectData._id,
-					identifier,
-				});
+			// Update basic fields
+			if (Object.keys(updates).length > 0) {
+				await client.updateDoc(
+					tracker.class.Issue,
+					projectData._id,
+					issue._id,
+					updates,
+				);
+			}
 
-				if (!issue) {
-					throw new Error(`Issue "${identifier}" not found`);
-				}
+			// Handle description separately (need to upload Markup)
+			if (description !== undefined) {
+				const descriptionRef = await client.uploadMarkup(
+					tracker.class.Issue,
+					issue._id,
+					"description",
+					description,
+					"markdown",
+				);
+				await client.updateDoc(
+					tracker.class.Issue,
+					projectData._id,
+					issue._id,
+					{ description: descriptionRef },
+				);
+			}
 
-				const updates: IssueUpdates = {};
-				if (title) updates.title = title;
-				if (status) updates.status = status;
-				if (assignee !== undefined) updates.assignee = assignee;
-				if (priority) {
-					updates.priority = stringToPriority(priority);
-				}
-
-				// Update basic fields
-				if (Object.keys(updates).length > 0) {
-					await client.updateDoc(
-						tracker.class.Issue,
-						projectData._id,
-						issue._id,
-						updates,
-					);
-				}
-
-				// Handle description separately (need to upload Markup)
-				if (description !== undefined) {
-					const descriptionRef = await client.uploadMarkup(
-						tracker.class.Issue,
-						issue._id,
-						"description",
-						description,
-						"markdown",
-					);
-					await client.updateDoc(
-						tracker.class.Issue,
-						projectData._id,
-						issue._id,
-						{ description: descriptionRef },
-					);
-				}
-
-				return {
-					content: [{ type: "text", text: `Updated issue: ${identifier}` }],
-					structuredContent: { success: true },
-				};
-			},
-		),
+			return {
+				content: [{ type: "text", text: `Updated issue: ${identifier}` }],
+				structuredContent: { success: true },
+			};
+		},
 	);
 }
 
@@ -451,7 +448,7 @@ export function registerSetAssignee(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project, identifier, assignee }) => {
+		async ({ project, identifier, assignee }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -484,7 +481,7 @@ export function registerSetAssignee(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -507,7 +504,7 @@ export function registerSetMilestone(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project, identifier, milestone }) => {
+		async ({ project, identifier, milestone }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -540,7 +537,7 @@ export function registerSetMilestone(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }
 
@@ -562,7 +559,7 @@ export function registerDeleteIssue(
 				success: z.boolean(),
 			},
 		},
-		wrapTool(async ({ project, identifier }) => {
+		async ({ project, identifier }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -593,6 +590,6 @@ export function registerDeleteIssue(
 				],
 				structuredContent: { success: true },
 			};
-		}),
+		},
 	);
 }

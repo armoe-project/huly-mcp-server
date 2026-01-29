@@ -1,31 +1,13 @@
 /**
  * Error handler utilities for MCP tools
+ *
+ * Note: MCP SDK has built-in error handling via createToolError.
+ * Tool handlers can throw exceptions normally - they will be caught
+ * and converted to proper error responses with isError: true.
+ *
+ * The global error handlers in index.ts are configured to log errors
+ * without crashing the server (no process.exit).
  */
 
-/**
- * Wraps an MCP tool handler with error handling.
- * Returns a properly formatted error response instead of throwing.
- */
-export function wrapTool<T extends Record<string, unknown>>(
-	handler: (args: T) => Promise<unknown>,
-): (args: T) => Promise<unknown> {
-	return async (args: T) => {
-		try {
-			return await handler(args);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			console.error("[Tool Error]", message); // Log to stderr for debugging
-
-			// Return error response instead of throwing
-			return {
-				content: [
-					{
-						type: "text",
-						text: `执行失败: ${message}`,
-					},
-				],
-				isError: true,
-			};
-		}
-	};
-}
+// Empty export - this file exists for documentation purposes
+export {};
