@@ -89,8 +89,25 @@ HULY_URL=https://huly.app
 {
   "mcpServers": {
     "huly": {
-      "command": "bun",
-      "args": ["run", "/path/to/huly-mcp-server/src/index.ts"],
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_TOKEN": "your-token"
+      }
+    }
+  }
+}
+```
+
+または npx を使用：
+
+```json
+{
+  "mcpServers": {
+    "huly": {
+      "command": "npx",
+      "args": ["@armoe/huly-mcp-server"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
         "HULY_TOKEN": "your-token"

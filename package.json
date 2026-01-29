@@ -26,7 +26,11 @@
 		"model-context-protocol"
 	],
 	"license": "GPL-3.0-only",
+	"bin": {
+		"huly-mcp-server": "bin/huly-mcp-server"
+	},
 	"files": [
+		"bin",
 		"src",
 		"README.md",
 		"README_CN.md",
@@ -46,7 +50,6 @@
 		"@hcengineering/api-client": "^0.7.18",
 		"@hcengineering/contact": "^0.7.0",
 		"@hcengineering/core": "^0.7.23",
-		"@hcengineering/document": "^0.7.0",
 		"@hcengineering/rank": "^0.7.17",
 		"@hcengineering/tags": "^0.7.0",
 		"@hcengineering/task": "^0.7.0",

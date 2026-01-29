@@ -89,8 +89,25 @@ Add to `~/.claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "huly": {
-      "command": "bun",
-      "args": ["run", "/path/to/huly-mcp-server/src/index.ts"],
+      "command": "bunx",
+      "args": ["@armoe/huly-mcp-server"],
+      "env": {
+        "HULY_WORKSPACE": "your-workspace",
+        "HULY_TOKEN": "your-token"
+      }
+    }
+  }
+}
+```
+
+Or using npx:
+
+```json
+{
+  "mcpServers": {
+    "huly": {
+      "command": "npx",
+      "args": ["@armoe/huly-mcp-server"],
       "env": {
         "HULY_WORKSPACE": "your-workspace",
         "HULY_TOKEN": "your-token"

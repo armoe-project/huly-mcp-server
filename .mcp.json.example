@@ -1,14 +1,40 @@
 {
 	"mcpServers": {
-		"huly-dev": {
-			"command": "bun",
-			"args": ["run", "src/index.ts"],
+		"huly": {
+			"command": "bunx",
+			"args": ["@armoe/huly-mcp-server"],
 			"env": {
-				"HULY_EMAIL": "your-email@example.com",
-				"HULY_PASSWORD": "your-password-here",
-				"HULY_URL": "https://your-huly-instance.com",
-				"HULY_WORKSPACE": "your-workspace"
+				"HULY_WORKSPACE": "your-workspace",
+				"HULY_TOKEN": "your-token-here"
 			}
 		}
 	}
 }
+
+// Alternative using npx:
+// {
+// 	"mcpServers": {
+// 		"huly": {
+// 			"command": "npx",
+// 			"args": ["@armoe/huly-mcp-server"],
+// 			"env": {
+// 				"HULY_WORKSPACE": "your-workspace",
+// 				"HULY_TOKEN": "your-token-here"
+// 			}
+// 		}
+// 	}
+// }
+
+// Alternative for local development:
+// {
+// 	"mcpServers": {
+// 		"huly": {
+// 			"command": "bun",
+// 			"args": ["run", "src/index.ts"],
+// 			"env": {
+// 				"HULY_WORKSPACE": "your-workspace",
+// 				"HULY_TOKEN": "your-token-here"
+// 			}
+// 		}
+// 	}
+// }
