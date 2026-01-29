@@ -39,12 +39,14 @@ import { registerGetProject, registerListProjects } from "./tools/project.js";
 
 // Global error handlers
 process.on("unhandledRejection", (reason, promise) => {
-	console.error("Unhandled Rejection at:", promise, "reason:", reason);
+	// Log but don't crash - MCP can recover
+	console.error("[Unhandled Rejection]", reason, "at:", promise);
 });
 
 process.on("uncaughtException", (error) => {
-	console.error("Uncaught Exception:", error);
-	process.exit(1);
+	// Log error details but try to keep server alive
+	console.error("[Uncaught Exception]", error);
+	// Don't exit - let the client handle the failed request
 });
 
 // Load configuration

@@ -4,6 +4,7 @@ import tags, { type TagElement } from "@hcengineering/tags";
 import tracker from "@hcengineering/tracker";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
+import { wrapTool } from "../utils/error-handler.js";
 
 // Add Label
 export function registerAddLabel(
@@ -24,7 +25,7 @@ export function registerAddLabel(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, identifier, label }) => {
+		wrapTool(async ({ project, identifier, label }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -83,7 +84,9 @@ export function registerAddLabel(
 
 			if (existing) {
 				return {
-					content: [{ type: "text", text: `Label "${label}" already exists on issue` }],
+					content: [
+						{ type: "text", text: `Label "${label}" already exists on issue` },
+					],
 					structuredContent: { success: true },
 				};
 			}
@@ -111,7 +114,7 @@ export function registerAddLabel(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }
 
@@ -134,7 +137,7 @@ export function registerRemoveLabel(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, identifier, label }) => {
+		wrapTool(async ({ project, identifier, label }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -186,6 +189,6 @@ export function registerRemoveLabel(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }

@@ -1,11 +1,6 @@
 import type { PlatformClient } from "@hcengineering/api-client";
 import type { Person } from "@hcengineering/contact";
-import core, {
-	type Class,
-	generateId,
-	type Ref,
-	SortingOrder,
-} from "@hcengineering/core";
+import core, { generateId, type Ref, SortingOrder } from "@hcengineering/core";
 import { makeRank } from "@hcengineering/rank";
 import tracker, {
 	type Issue,
@@ -15,6 +10,7 @@ import tracker, {
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
 import { priorityToString, stringToPriority } from "../utils/converters.js";
+import { wrapTool } from "../utils/error-handler.js";
 
 // Type definitions to avoid `any`
 interface IssueQuery {
@@ -34,7 +30,6 @@ interface IssueUpdates {
 	priority?: number;
 	assignee?: Ref<Person> | null;
 }
-
 
 // List Issues
 export function registerListIssues(
@@ -64,7 +59,7 @@ export function registerListIssues(
 				),
 			},
 		},
-		async ({ project, limit = 20, status }) => {
+		wrapTool(async ({ project, limit = 20, status }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -103,7 +98,7 @@ export function registerListIssues(
 					})),
 				},
 			};
-		},
+		}),
 	);
 }
 
@@ -135,7 +130,7 @@ export function registerGetIssue(
 				}),
 			},
 		},
-		async ({ project, identifier }) => {
+		wrapTool(async ({ project, identifier }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -209,7 +204,7 @@ export function registerGetIssue(
 					},
 				},
 			};
-		},
+		}),
 	);
 }
 
@@ -244,7 +239,7 @@ export function registerCreateIssue(
 				}),
 			},
 		},
-		async ({ project, title, description, priority, assignee }) => {
+		wrapTool(async ({ project, title, description, priority, assignee }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -331,7 +326,7 @@ export function registerCreateIssue(
 					},
 				},
 			};
-		},
+		}),
 	);
 }
 
@@ -349,7 +344,10 @@ export function registerUpdateIssue(
 				project: z.string().describe("Project identifier"),
 				identifier: z.string().describe("Issue identifier"),
 				title: z.string().optional().describe("New title"),
-				description: z.string().optional().describe("New description (Markdown supported)"),
+				description: z
+					.string()
+					.optional()
+					.describe("New description (Markdown supported)"),
 				status: z.string().optional().describe("New status ID"),
 				priority: z.string().optional().describe("New priority"),
 				assignee: z.string().optional().describe("New assignee ID"),
@@ -358,74 +356,76 @@ export function registerUpdateIssue(
 				success: z.boolean(),
 			},
 		},
-		async ({
-			project,
-			identifier,
-			title,
-			description,
-			status,
-			priority,
-			assignee,
-		}) => {
-			const client = await getClient();
-
-			const projectData = await client.findOne(tracker.class.Project, {
-				identifier: project,
-			});
-
-			if (!projectData) {
-				throw new Error(`Project "${project}" not found`);
-			}
-
-			const issue = await client.findOne(tracker.class.Issue, {
-				space: projectData._id,
+		wrapTool(
+			async ({
+				project,
 				identifier,
-			});
+				title,
+				description,
+				status,
+				priority,
+				assignee,
+			}) => {
+				const client = await getClient();
 
-			if (!issue) {
-				throw new Error(`Issue "${identifier}" not found`);
-			}
+				const projectData = await client.findOne(tracker.class.Project, {
+					identifier: project,
+				});
 
-			const updates: IssueUpdates = {};
-			if (title) updates.title = title;
-			if (status) updates.status = status;
-			if (assignee !== undefined) updates.assignee = assignee;
-			if (priority) {
-				updates.priority = stringToPriority(priority);
-			}
+				if (!projectData) {
+					throw new Error(`Project "${project}" not found`);
+				}
 
-			// Update basic fields
-			if (Object.keys(updates).length > 0) {
-				await client.updateDoc(
-					tracker.class.Issue,
-					projectData._id,
-					issue._id,
-					updates,
-				);
-			}
+				const issue = await client.findOne(tracker.class.Issue, {
+					space: projectData._id,
+					identifier,
+				});
 
-			// Handle description separately (need to upload Markup)
-			if (description !== undefined) {
-				const descriptionRef = await client.uploadMarkup(
-					tracker.class.Issue,
-					issue._id,
-					"description",
-					description,
-					"markdown",
-				);
-				await client.updateDoc(
-					tracker.class.Issue,
-					projectData._id,
-					issue._id,
-					{ description: descriptionRef },
-				);
-			}
+				if (!issue) {
+					throw new Error(`Issue "${identifier}" not found`);
+				}
 
-			return {
-				content: [{ type: "text", text: `Updated issue: ${identifier}` }],
-				structuredContent: { success: true },
-			};
-		},
+				const updates: IssueUpdates = {};
+				if (title) updates.title = title;
+				if (status) updates.status = status;
+				if (assignee !== undefined) updates.assignee = assignee;
+				if (priority) {
+					updates.priority = stringToPriority(priority);
+				}
+
+				// Update basic fields
+				if (Object.keys(updates).length > 0) {
+					await client.updateDoc(
+						tracker.class.Issue,
+						projectData._id,
+						issue._id,
+						updates,
+					);
+				}
+
+				// Handle description separately (need to upload Markup)
+				if (description !== undefined) {
+					const descriptionRef = await client.uploadMarkup(
+						tracker.class.Issue,
+						issue._id,
+						"description",
+						description,
+						"markdown",
+					);
+					await client.updateDoc(
+						tracker.class.Issue,
+						projectData._id,
+						issue._id,
+						{ description: descriptionRef },
+					);
+				}
+
+				return {
+					content: [{ type: "text", text: `Updated issue: ${identifier}` }],
+					structuredContent: { success: true },
+				};
+			},
+		),
 	);
 }
 
@@ -451,7 +451,7 @@ export function registerSetAssignee(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, identifier, assignee }) => {
+		wrapTool(async ({ project, identifier, assignee }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -484,7 +484,7 @@ export function registerSetAssignee(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }
 
@@ -507,7 +507,7 @@ export function registerSetMilestone(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, identifier, milestone }) => {
+		wrapTool(async ({ project, identifier, milestone }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -540,7 +540,7 @@ export function registerSetMilestone(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }
 
@@ -562,7 +562,7 @@ export function registerDeleteIssue(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, identifier }) => {
+		wrapTool(async ({ project, identifier }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -582,11 +582,7 @@ export function registerDeleteIssue(
 				throw new Error(`Issue "${identifier}" not found`);
 			}
 
-			await client.removeDoc(
-				tracker.class.Issue,
-				projectData._id,
-				issue._id,
-			);
+			await client.removeDoc(tracker.class.Issue, projectData._id, issue._id);
 
 			return {
 				content: [
@@ -597,6 +593,6 @@ export function registerDeleteIssue(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }

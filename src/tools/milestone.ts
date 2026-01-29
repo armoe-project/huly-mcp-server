@@ -10,6 +10,7 @@ import {
 	milestoneStatusToString,
 	stringToMilestoneStatus,
 } from "../utils/converters.js";
+import { wrapTool } from "../utils/error-handler.js";
 
 // List Milestones
 export function registerListMilestones(
@@ -35,7 +36,7 @@ export function registerListMilestones(
 				),
 			},
 		},
-		async ({ project }) => {
+		wrapTool(async ({ project }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -68,7 +69,7 @@ export function registerListMilestones(
 					})),
 				},
 			};
-		},
+		}),
 	);
 }
 
@@ -85,7 +86,10 @@ export function registerCreateMilestone(
 			inputSchema: {
 				project: z.string().describe("Project identifier"),
 				label: z.string().describe("Milestone name"),
-				targetDate: z.string().optional().describe("Target date (ISO 8601 format)"),
+				targetDate: z
+					.string()
+					.optional()
+					.describe("Target date (ISO 8601 format)"),
 				status: z
 					.string()
 					.optional()
@@ -98,7 +102,7 @@ export function registerCreateMilestone(
 				}),
 			},
 		},
-		async ({ project, label, targetDate, status }) => {
+		wrapTool(async ({ project, label, targetDate, status }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -141,7 +145,7 @@ export function registerCreateMilestone(
 					},
 				},
 			};
-		},
+		}),
 	);
 }
 
@@ -163,7 +167,7 @@ export function registerDeleteMilestone(
 				success: z.boolean(),
 			},
 		},
-		async ({ project, label }) => {
+		wrapTool(async ({ project, label }) => {
 			const client = await getClient();
 
 			const projectData = await client.findOne(tracker.class.Project, {
@@ -198,6 +202,6 @@ export function registerDeleteMilestone(
 				],
 				structuredContent: { success: true },
 			};
-		},
+		}),
 	);
 }
