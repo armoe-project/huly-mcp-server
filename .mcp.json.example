@@ -1,0 +1,14 @@
+{
+	"mcpServers": {
+		"huly-dev": {
+			"command": "bun",
+			"args": ["run", "src/index.ts"],
+			"env": {
+				"HULY_EMAIL": "your-email@example.com",
+				"HULY_PASSWORD": "your-password-here",
+				"HULY_URL": "https://your-huly-instance.com",
+				"HULY_WORKSPACE": "your-workspace"
+			}
+		}
+	}
+}

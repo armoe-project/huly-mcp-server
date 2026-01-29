@@ -1,0 +1,63 @@
+{
+	"name": "@armoe/huly-mcp-server",
+	"version": "0.1.0",
+	"description": "MCP Server for Huly integration",
+	"type": "module",
+	"module": "src/index.ts",
+	"main": "src/index.ts",
+	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"start": "bun run src/index.ts",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write ."
+	},
+	"engines": {
+		"bun": ">=1.3.0"
+	},
+	"keywords": [
+		"mcp",
+		"huly",
+		"model-context-protocol"
+	],
+	"license": "GPL-3.0-only",
+	"files": [
+		"src",
+		"README.md",
+		"README_CN.md",
+		"README_TW.md",
+		"README_JP.md",
+		"LICENSE"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/armoe-project/huly-mcp-server.git"
+	},
+	"bugs": {
+		"url": "https://github.com/armoe-project/huly-mcp-server/issues"
+	},
+	"homepage": "https://github.com/armoe-project/huly-mcp-server#readme",
+	"dependencies": {
+		"@hcengineering/api-client": "^0.7.18",
+		"@hcengineering/contact": "^0.7.0",
+		"@hcengineering/core": "^0.7.23",
+		"@hcengineering/document": "^0.7.0",
+		"@hcengineering/rank": "^0.7.17",
+		"@hcengineering/tags": "^0.7.0",
+		"@hcengineering/task": "^0.7.0",
+		"@hcengineering/tracker": "^0.7.0",
+		"@modelcontextprotocol/sdk": "^1.25.1",
+		"ws": "^8.19.0",
+		"zod": "^4.3.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@types/bun": "^1.3.5",
+		"typescript": "^5.9.3"
+	}
+}
