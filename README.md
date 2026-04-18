@@ -1,5 +1,7 @@
 # Huly MCP Server
 
+Please use [huly-mcp](https://github.com/dearlordylord/huly-mcp)
+
 [Model Context Protocol](https://modelcontextprotocol.io) server for connecting to [Huly](https://huly.app) project management platform.
 
 ## Features
